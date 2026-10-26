@@ -1,0 +1,48 @@
+verbose: true
+instrumentation:
+    globals: ['expect', 'should', 'assert', 'chai']
+    root: ./src
+    default-excludes: true
+    excludes: ['icons', 'locales']
+    include-all-sources: true
+    include-pid: false
+    es-modules: true
+    ignoreLeaks: true
+    ui: bdd
+    embed-source: false
+    variable: __coverage__
+    compact: true
+    preserve-comments: false
+    complete-copy: false
+    save-baseline: false
+    baseline-file: ./coverage/coverage-baseline.json
+reporting:
+    print: both
+    reports:
+        - lcov
+        - html
+        - cobertura
+        - clover
+    dir: ./coverage
+    watermarks:
+        statements: [50, 80]
+        lines: [50, 80]
+        functions: [50, 80]
+        branches: [50, 70]
+hooks:
+    hook-run-in-context: false
+    post-require-hook: null
+    handle-sigint: false
+check:
+    global:
+        statements: 80
+        lines: 80
+        branches: 60
+        functions: 80
+        excludes: []
+    each:
+        statements: 90
+        lines: 90
+        branches: 70
+        functions: 90
+        excludes: []
