@@ -245,7 +245,7 @@ module.exports = function (RED) {
 
     function sendMessage (values, response, msg) {
       const topic = msg.topic || node.topic
-      if (node.useIOFile && node.ioFile.lastUpdatedAt) {
+      if (node.useIOFile && node.ioFile && node.ioFile.lastUpdatedAt) {
         if (node.logIOActivities) {
           mbIOCore.internalDebug('node.adr:' + node.adr + ' node.quantity:' + node.quantity)
         }

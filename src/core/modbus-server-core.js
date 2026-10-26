@@ -91,15 +91,19 @@ de.biancoroyal.modbus.core.server.writeModbusFlexServerMemory = function (node, 
   }
 }
 
+de.biancoroyal.modbus.core.server.maxMultipleWriteBytes = 65535
+
 de.biancoroyal.modbus.core.server.convertInputForBufferWrite = function (msg) {
   let isMultipleWrite = false
-  if (msg.payload.value?.length) {
-    msg.bufferPayload = new Uint8Array(msg.payload?.value)
+  const value = msg?.payload?.value
+  const isByteSequence = Array.isArray(value) || Buffer.isBuffer(value) || ArrayBuffer.isView(value)
+  if (isByteSequence && value.length > 0 && value.length <= de.biancoroyal.modbus.core.server.maxMultipleWriteBytes) {
+    msg.bufferPayload = new Uint8Array(value)
     msg.bufferData = Buffer.alloc(msg.bufferPayload.buffer.byteLength, msg.bufferPayload)
     isMultipleWrite = true
     msg.wasMultipleWrite = true
   } else {
-    msg.bufferPayload = Number(msg.payload.value)
+    msg.bufferPayload = Number(value)
     msg.wasMultipleWrite = false
   }
 

@@ -308,5 +308,35 @@ describe('Modbus E2E Flex FC-Functionality tests', function () {
           })
       })
     })
+
+    it('should return 400 for path traversal in mapPath', function (done) {
+      helper.load(nodeList, testFcFlexFlows.testFlexFCFunctionality, function () {
+        helper.request()
+          .post('/modbus/fc/4f80ae4fa5b8af80')
+          .send({ mapPath: '../../package.json' })
+          .expect(400)
+          .end(done)
+      })
+    })
+
+    it('should return 400 for non-string mapPath', function (done) {
+      helper.load(nodeList, testFcFlexFlows.testFlexFCFunctionality, function () {
+        helper.request()
+          .post('/modbus/fc/4f80ae4fa5b8af80')
+          .send({ mapPath: { malicious: true } })
+          .expect(400)
+          .end(done)
+      })
+    })
+
+    it('should return 500 when JSON file does not contain valid argumentMaps schema', function (done) {
+      helper.load(nodeList, testFcFlexFlows.testFlexFCFunctionality, function () {
+        helper.request()
+          .post('/modbus/fc/4f80ae4fa5b8af80')
+          .send({ mapPath: './package.json' })
+          .expect(500)
+          .end(done)
+      })
+    })
   })
 })

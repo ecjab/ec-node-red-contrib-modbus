@@ -215,7 +215,8 @@ module.exports = function (RED) {
       }
 
       const origMsgInput = Object.assign({}, msg)
-      const sequences = mbBasics.invalidSequencesIn(msg) ? node.sequences : msg.sequences
+      const rawSequences = mbBasics.invalidSequencesIn(msg) ? node.sequences : msg.sequences
+      const sequences = Array.isArray(rawSequences) ? rawSequences : []
 
       try {
         sequences.forEach(msg => {

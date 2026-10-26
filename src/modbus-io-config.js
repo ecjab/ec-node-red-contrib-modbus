@@ -19,7 +19,7 @@ module.exports = function (RED) {
   const coreIO = require('./core/modbus-io-core')
 
   function ModbusIOConfigNode (config) {
-    const fs = require('fs-extra')
+    const fs = require('fs')
     const UNLIMITED_LISTENERS = 0
 
     RED.nodes.createNode(this, config)
@@ -33,7 +33,14 @@ module.exports = function (RED) {
     node.setMaxListeners(UNLIMITED_LISTENERS)
     node.lastUpdatedAt = null
 
-    if (!fs.existsSync(node.path)) {
+    let isExistingFile = false
+    try {
+      isExistingFile = Boolean(node.path && fs.existsSync(node.path) && fs.statSync(node.path).isFile())
+    } catch (err) {
+      isExistingFile = false
+    }
+
+    if (!isExistingFile) {
       coreIO.internalDebug('IO File Not Found ' + node.path)
       node.warn('Modbus IO File Not Found ' + node.path)
     } else {
@@ -78,7 +85,9 @@ module.exports = function (RED) {
           coreIO.internalDebug('Reload IO File ' + node.path)
           node.configData = []
           delete node.lastUpdatedAt
-          node.lineReader.removeAllListeners()
+          if (node.lineReader) {
+            node.lineReader.removeAllListeners()
+          }
           node.lineReader = new coreIO.LineByLineReader(node.path)
           setLineReaderEvents()
           coreIO.internalDebug('Reloading IO File Started For ' + node.path)
@@ -87,9 +96,15 @@ module.exports = function (RED) {
     }
 
     node.on('close', function (done) {
-      fs.unwatchFile(node.path)
-      node.watcher.stop()
-      node.lineReader.removeAllListeners()
+      if (isExistingFile && node.path) {
+        fs.unwatchFile(node.path)
+      }
+      if (node.watcher && typeof node.watcher.stop === 'function') {
+        node.watcher.stop()
+      }
+      if (node.lineReader) {
+        node.lineReader.removeAllListeners()
+      }
       node.removeAllListeners()
       done()
     })
