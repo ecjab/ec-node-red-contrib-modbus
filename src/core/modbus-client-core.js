@@ -325,9 +325,10 @@ de.biancoroyal.modbus.core.client.writeModbusByFunctionCodeFive = function (node
 
 de.biancoroyal.modbus.core.client.writeModbusByFunctionCodeFifteen = function (node, msg, cb, cberr) {
   const coreClient = de.biancoroyal.modbus.core.client
-  if (parseInt(msg.payload.value.length) !== parseInt(msg.payload.quantity)) {
+  if (!msg.payload.value || parseInt(msg.payload.value.length) !== parseInt(msg.payload.quantity)) {
+    const valLen = msg.payload.value ? msg.payload.value.length : 0
     coreClient.activateSendingOnFailure(node, cberr, new Error('Quantity should be less or equal to coil payload array length: ' +
-      msg.payload.value.length + ' Addr: ' + msg.payload.address + ' Q: ' + msg.payload.quantity), msg)
+      valLen + ' Addr: ' + msg.payload.address + ' Q: ' + msg.payload.quantity), msg)
   } else {
     node.client.writeCoils(parseInt(msg.payload.address), msg.payload.value).then(function (resp) {
       coreClient.activateSendingOnSuccess(node, cb, cberr, resp, msg)
@@ -366,9 +367,10 @@ de.biancoroyal.modbus.core.client.writeModbusByFunctionCodeSix = function (node,
 
 de.biancoroyal.modbus.core.client.writeModbusByFunctionCodeSixteen = function (node, msg, cb, cberr) {
   const coreClient = de.biancoroyal.modbus.core.client
-  if (parseInt(msg.payload.value.length) !== parseInt(msg.payload.quantity)) {
+  if (!msg.payload.value || parseInt(msg.payload.value.length) !== parseInt(msg.payload.quantity)) {
+    const valLen = msg.payload.value ? msg.payload.value.length : 0
     coreClient.activateSendingOnFailure(node, cberr, new Error('Quantity should be less or equal to register payload array length: ' +
-      msg.payload.value.length + ' Addr: ' + msg.payload.address + ' Q: ' + msg.payload.quantity), msg)
+      valLen + ' Addr: ' + msg.payload.address + ' Q: ' + msg.payload.quantity), msg)
   } else {
     node.client.writeRegisters(parseInt(msg.payload.address), msg.payload.value).then(function (resp) {
       coreClient.activateSendingOnSuccess(node, cb, cberr, resp, msg)
@@ -515,12 +517,13 @@ de.biancoroyal.modbus.core.client.setNewNodeSettings = function (node, msg) {
   const nodeLog = de.biancoroyal.modbus.core.client.getLogFunction(node)
   const coreClient = de.biancoroyal.modbus.core.client
 
-  if (!msg) {
+  if (!msg || !msg.payload) {
     nodeLog('New Connection message invalid.')
     return false
   }
 
-  switch (msg.payload.connectorType.toUpperCase()) {
+  const connectorType = typeof msg.payload.connectorType === 'string' ? msg.payload.connectorType.toUpperCase() : ''
+  switch (connectorType) {
     case 'TCP':
       coreClient.setNewTCPNodeSettings(node, msg)
       nodeLog('New Connection TCP Settings ' + node.tcpHost + ' ' + node.tcpPort + ' ' + node.tcpType)

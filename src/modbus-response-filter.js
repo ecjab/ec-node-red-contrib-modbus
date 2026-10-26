@@ -38,18 +38,24 @@ module.exports = function (RED) {
 
     const node = this
 
-    modbusIOFileValuNames = node.ioFile.configData
+    modbusIOFileValuNames = node.ioFile ? node.ioFile.configData : []
 
     mbBasics.setNodeStatusTo('active', node)
 
-    node.ioFile.on('updatedConfig', function (configData) {
-      modbusIOFileValuNames = configData
-    })
+    if (node.ioFile && typeof node.ioFile.on === 'function') {
+      node.ioFile.on('updatedConfig', function (configData) {
+        modbusIOFileValuNames = configData
+      })
+    }
 
     node.filterFromPayload = function (msg) {
-      msg.payload = msg.payload.filter((item) => {
-        return item.name === node.filter
-      })
+      if (Array.isArray(msg.payload)) {
+        msg.payload = msg.payload.filter((item) => {
+          return item && item.name === node.filter
+        })
+      } else {
+        msg.payload = []
+      }
 
       if (node.filterResponseBuffer) {
         delete msg.responseBuffer

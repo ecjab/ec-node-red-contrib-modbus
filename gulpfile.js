@@ -15,7 +15,7 @@ const pump = require('pump')
 const sourcemaps = require('gulp-sourcemaps')
 const replace = require('gulp-replace')
 const changelog = require('gulp-conventional-changelog')
-const htmlmin = require('gulp-htmlmin')
+const htmlmin = require('gulp-html-minifier-terser')
 
 function releaseIcons () {
   return src('src/icons/**/*').pipe(dest('modbus/icons'))
@@ -99,8 +99,27 @@ function codeJSContent (cb) {
 }
 
 function doc (cb) {
+  const jsdocConfig = {
+    tags: {
+      allowUnknownTags: true
+    },
+    opts: {
+      destination: './docs/gen',
+      template: 'templates/default'
+    },
+    plugins: [
+      'plugins/markdown'
+    ],
+    templates: {
+      cleverLinks: false,
+      monospaceLinks: false,
+      default: {
+        outputSourceFiles: true
+      }
+    }
+  }
   src(['README.md', 'src/**/*.js'], { read: false })
-    .pipe(jsdoc(cb))
+    .pipe(jsdoc(jsdocConfig, cb))
 }
 
 exports.default = series(cleanProject, releaseWebContent, releaseJSContent, codeJSContent, releaseLocal, releaseIcons, doc, docIcons, docImages, changelogUpdate)

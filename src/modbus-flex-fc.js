@@ -284,17 +284,26 @@ module.exports = function (RED) {
     const fs = require('fs')
     const path = require('node:path')
 
-    const mapPath = req.body.mapPath
+    const mapPath = req.body && req.body.mapPath
 
-    if (req.body.mapPath) {
-      if (req.body.mapPath.endsWith('.json') === false) {
+    if (mapPath !== undefined && mapPath !== null && mapPath !== '') {
+      if (typeof mapPath !== 'string' || mapPath.includes('\0')) {
+        res.status(400).json({ code: 400, message: 'ERROR: Invalid file path' })
+        return
+      }
+      if (mapPath.endsWith('.json') === false) {
         res.status(400).json({ code: 400, message: 'ERROR: Invalid file extension' })
+        return
+      }
+      const normalizedSegments = mapPath.split(/[/\\]+/)
+      if (normalizedSegments.includes('..')) {
+        res.status(400).json({ code: 400, message: 'ERROR: Path traversal is not allowed' })
         return
       }
     }
 
-    const filepath = mapPath || './extras/argumentMaps/defaults/codes.json'
-    const resolvedPath = path.resolve(filepath)
+    const defaultMapPath = path.resolve(__dirname, '../extras/argumentMaps/defaults/codes.json')
+    const resolvedPath = mapPath ? path.resolve(mapPath) : defaultMapPath
 
     fs.readFile(resolvedPath, (error, data) => {
       let response = {}
@@ -302,8 +311,13 @@ module.exports = function (RED) {
         response = { code: 404, message: 'ERROR: File not found' }
       } else {
         try {
-          response.message = JSON.parse(data)
-          response.code = 200
+          const parsed = JSON.parse(data)
+          if (!parsed || typeof parsed !== 'object' || !parsed.argumentMaps || typeof parsed.argumentMaps !== 'object' || Array.isArray(parsed.argumentMaps)) {
+            response = { code: 500, message: 'ERROR: File contains invalid argumentMaps schema' }
+          } else {
+            response.message = { argumentMaps: parsed.argumentMaps }
+            response.code = 200
+          }
         } catch (error) {
           response = { code: 500, message: 'ERROR: File contains invalid JSON' }
         }

@@ -250,7 +250,7 @@ de.biancoroyal.modbus.io.core.insertValues = function (valueNames, register, log
   const ioCore = de.biancoroyal.modbus.io.core
 
   let index = 0
-  for (index in valueNames) {
+  for (index = 0; index < valueNames.length; index++) {
     const item = valueNames[index]
 
     if (!item || !Object.prototype.hasOwnProperty.call(item, 'registerAddress') || item.registerAddress < 0) {
@@ -304,7 +304,7 @@ de.biancoroyal.modbus.io.core.getValueFromBufferByDataType = function (item, buf
   const ioCore = de.biancoroyal.modbus.io.core
   const registerLength = responseBuffer.length / 2
 
-  if (bufferOffset < 0 || bufferOffset > responseBuffer.length) {
+  if (bufferOffset < 0 || bufferOffset >= responseBuffer.length) {
     if (logging) {
       ioCore.internalDebug('Wrong Buffer Access Parameter Type:' + item.dataType + ' Register-Length: ' + registerLength +
         ' Buffer-Length:' + responseBuffer.length + ' Address-Buffer-Offset:' + bufferOffset)
@@ -386,7 +386,7 @@ de.biancoroyal.modbus.io.core.convertValuesByType = function (valueNames, regist
   const sixteenBitBufferLength = 2
 
   let index = 0
-  for (index in valueNames) {
+  for (index = 0; index < valueNames.length; index++) {
     let item = valueNames[index]
 
     if (!item || !Object.prototype.hasOwnProperty.call(item, 'dataType') || !Object.prototype.hasOwnProperty.call(item, 'registerAddress') || item.registerAddress < 0) {
@@ -473,7 +473,7 @@ de.biancoroyal.modbus.io.core.buildMessageWithIO = function (node, values, respo
   rawMsg.values = values
   delete rawMsg.responseBuffer
 
-  if (node.useIOFile && node.ioFile.lastUpdatedAt) {
+  if (node.useIOFile && node.ioFile && node.ioFile.lastUpdatedAt) {
     const allValueNames = this.nameValuesFromIOFile(node, msg, values, response, parseInt(msg.payload.address) || 0)
     const valueNames = this.filterValueNames(node, allValueNames, parseInt(msg.payload.fc) || 3,
       parseInt(msg.payload.address) || 0,

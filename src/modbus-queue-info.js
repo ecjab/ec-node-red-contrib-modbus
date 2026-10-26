@@ -259,6 +259,10 @@ module.exports = function (RED) {
 
     node.on('input', function (msg) {
       let msgUnitId = node.unitid
+      const rawPayload = msg.payload
+      if (!msg.payload || typeof msg.payload !== 'object') {
+        msg.payload = {}
+      }
       msg.payload.queueEnabled = modbusClient.bufferCommands
 
       if (node.updateOnAllUnitQueues) {
@@ -269,7 +273,7 @@ module.exports = function (RED) {
           if (msg.payload.resetQueue) {
             msgUnitId = parseInt(msg.payload.unitId) || node.unitid
           } else {
-            msgUnitId = parseInt(msg.payload) || node.unitid
+            msgUnitId = parseInt(rawPayload) || node.unitid
           }
         } catch (err) {
           node.errorProtocolMsg(err, msg)

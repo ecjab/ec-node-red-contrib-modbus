@@ -103,7 +103,7 @@
     },
     button: {
       onclick: function () {
-        let label = (this.name || 'modbus-read').replace(/&/g, '&amp').replace(/</g, '&lt').replace(/>/g, '&gt')
+        let label = (this.name || 'modbus-read').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         let node = this
 
         $.ajax({

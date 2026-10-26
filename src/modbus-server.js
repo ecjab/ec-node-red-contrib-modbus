@@ -26,6 +26,15 @@ module.exports = function (RED) {
 
     const bufferFactor = 8
 
+    const maxBufferSize = 65535 * bufferFactor
+    const clampBufferSize = (rawSize) => {
+      const parsed = parseInt(rawSize * bufferFactor)
+      if (!Number.isInteger(parsed) || parsed < 0) {
+        return 1024 * bufferFactor
+      }
+      return Math.min(parsed, maxBufferSize)
+    }
+
     this.name = config.name
     this.logEnabled = config.logEnabled
     this.hostname = config.hostname || '0.0.0.0'
@@ -33,10 +42,10 @@ module.exports = function (RED) {
     this.responseDelay = parseInt(config.responseDelay) || 1
     this.delayUnit = config.delayUnit
     this.showStatusActivities = config.showStatusActivities || false
-    this.coilsBufferSize = parseInt(config.coilsBufferSize * bufferFactor)
-    this.holdingBufferSize = parseInt(config.holdingBufferSize * bufferFactor)
-    this.inputBufferSize = parseInt(config.inputBufferSize * bufferFactor)
-    this.discreteBufferSize = parseInt(config.discreteBufferSize * bufferFactor)
+    this.coilsBufferSize = clampBufferSize(config.coilsBufferSize)
+    this.holdingBufferSize = clampBufferSize(config.holdingBufferSize)
+    this.inputBufferSize = clampBufferSize(config.inputBufferSize)
+    this.discreteBufferSize = clampBufferSize(config.discreteBufferSize)
 
     this.showErrors = config.showErrors
     this.internalDebugLog = internalDebugLog

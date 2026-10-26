@@ -88,11 +88,11 @@
               const description = code["shortDesc"]
               const desc = name + " - " + description;
 
-              $("#node-input-selected-fc").append("<option value='" + keys[i] + "'" + ">" + desc + "</option>");
+              $("#node-input-selected-fc").append($("<option></option>").attr("value", keys[i]).text(desc));
               $("#node-input-selected-fc").val(node.lastSelectedFc);
             }
           },
-        error: function (error) {
+        error: function (xhr, error) {
           switch(xhr.status) {
             case 404:
               const errMessageNotFound = "File " + node.mapPath + " not found!";
@@ -101,6 +101,7 @@
             case 500:
               const errMessageSyntax = "File " + node.mapPath + "contains syntax errors!";
               RED.notify(errMessageSyntax);
+              break;
             default:
               RED.notify("Unknown Error!");
           }
@@ -126,7 +127,7 @@
                 const description = code["shortDesc"]
                 const desc = name + " - " + description;
 
-                $("#node-input-selected-fc").append("<option value='" + keys[i] + "'" + ">" + desc + "</option>");
+                $("#node-input-selected-fc").append($("<option></option>").attr("value", keys[i]).text(desc));
                 $("#node-input-selected-fc").val(node.lastSelectedFc);
 
                 const loadedMessage = "Loaded CFC " + name + " successfully ";
@@ -143,6 +144,7 @@
                 case 500:
                   const errMessageSyntax = "File " + node.mapPath + "contains syntax errors!";
                   RED.notify(errMessageSyntax);
+                  break;
                 default:
                   RED.notify("Unknown Error!");
               }
@@ -230,7 +232,7 @@
         node.requestMapEditor.destroy();
         delete node.requestMapEditor;
         node.responseMapEditor.destroy();
-        delete node.requestMapEditor;
+        delete node.responseMapEditor;
       },
 
       oneditcancel: function() {

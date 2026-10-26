@@ -307,6 +307,19 @@ describe('Core Server Testing', function () {
         assert.strict.equal(modbusServerNode.modbusServer.input.readUInt8(3), 202)
         done()
       })
+
+      it('should reject fake length objects in convertInputForBufferWrite to prevent OOM DoS', function (done) {
+        const maliciousMsg = {
+          payload: {
+            value: { length: 1000000000 },
+            register: 'holding',
+            address: 0
+          }
+        }
+        assert.strict.equal(coreServerUnderTest.convertInputForBufferWrite(maliciousMsg), false)
+        assert.strict.equal(maliciousMsg.wasMultipleWrite, false)
+        done()
+      })
     })
   })
 })
